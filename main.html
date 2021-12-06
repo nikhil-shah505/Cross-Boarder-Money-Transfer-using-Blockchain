@@ -1,0 +1,447 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <nav class="bank_navbar">
+        <a class="bank_head" href="#purch_order">Bank Application</a>
+    </nav>
+    <div class="tab-content" id="tab_content">
+        <div class="tab-pane fade show active" id="purch_order">
+            <div class="purch_ord_back container pt-4">
+                <div class="tab-content">
+                    <div id="create_po" class="tab-pane fade show active">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <form class="bank_form row p-4" method="POST">
+                                    <div class="col-md-12 mt-4">
+                                        <label for="form_receiver" class="col-md-3">Receiver</label>
+                                        <input type="text" id="form_receiver" class="col-md-8" name="form_receiver"
+                                            placeholder="Enter Receiver Name">
+                                    </div>
+                                    <div class="col-md-12 mt-4">
+                                        <label for="form_sender" class="col-md-3">Sender</label>
+                                        <input type="text" id="form_sender" class="col-md-8" name="form_sender"
+                                            placeholder="Enter Sender Name">
+                                    </div>
+                                    <div class="col-md-12 mt-4">
+                                        <label for="form_amount" class="col-md-3">Amount</label>
+                                        <input type="text" id="form_amount" class="col-md-8" name="form_amount"
+                                            placeholder="Enter Amount">
+                                    </div>
+                                    <button class="bank_form_submit css_submit_button" type="submit">Submit</button>
+                                </form>
+                                <button class="view_bank_text m-3" id="view_bank_text">Get Chain</button>
+                            </div>
+                            <div class="col-md-6 block_display bank_block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6"></div>
+            </div>
+            <!-- <div id="view_po" class="tab-pane fade">
+                <button class="replace_chain m-3">Replace Chain</button>
+                <button class="connect_nodes_blockchain m-3">Connect Nodes</button>
+                <button class="validate_blockchain m-3">Validate</button>
+                <div class="bank_block"></div>
+            </div> -->
+
+        </div>
+    </div>
+    <!-- <div class="tab-pane fade" id="shipment_status" role="tabpanel" aria-labelledby="shipment_status_tab">
+                pqerpqrpqrp</div> -->
+
+    <!-- Modal content -->
+    <div id="myModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Message</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal_msg"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+        $(document).on('submit', '.bank_form', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '/bank_action',
+                data: {
+                    form_receiver: $("#form_receiver").val(),
+                    form_sender: $("#form_sender").val(),
+                    form_amount: $("#form_amount").val()
+                },
+                success: function (response) {
+                    $("#myModal").modal('show');
+                    $(".modal_msg").text(response.message);
+                }
+            })
+        });
+
+        $(document).on('click', '#view_bank_text', function (e) {
+            $.ajax({
+                type: 'GET',
+                url: '/get_chain',
+                success: function (response) {
+                    $(".bank_block").empty();
+                    if (response.length > 0) {
+                        $(response).each(function () {
+                            var chain = $(this)[0]["chain"]
+                            $(chain).each(function () {
+                                if ($(this)[0].transactions.length == 0) {
+                                    $(".bank_block").append("<div class='blc_block m-4'><div class='block_div blck_prev_hash'><p class='block_topic_fnt_size'>Previous Hash:</p>" + $(this)[0].previous_hash +
+                                        "</div><div class='block_div blck_proof'><p class='block_topic_fnt_size'>Proof:</p>" + $(this)[0].proof + "</div><div class='block_div blck_timestamp'><p class='block_topic_fnt_size'>Timestamp:</p>" + $(this)[0].timestamp + "</div>")
+                                } else {
+                                    $(".bank_block").append("<div class='blc_block m-4'><div class='block_div blck_prev_hash'><p class='block_topic_fnt_size'>Previous Hash:</p>" + $(this)[0].previous_hash +
+                                        "</div><div class='block_div blck_proof'><p class='block_topic_fnt_size'>Proof:</p>" + $(this)[0].proof + "</div><div class='block_div blck_timestamp'><p class='block_topic_fnt_size'>Timestamp:</p>" + $(this)[0].timestamp + "</div>" +
+                                        "<div class='block_div blck_po_number'><p class='block_topic_fnt_size'>Receiver:</p>" + $(this)[0].transactions[0].form_receiver + "</div><div class='block_div blck_po_date'><p class='block_topic_fnt_size'>Sender:</p>" + $(this)[0].transactions[0]["form_sender"] + "</div>" +
+                                        "<div class='block_div blck_first_name'><p class='block_topic_fnt_size'>Amount:</p>" + $(this)[0].transactions[0]["form_amount"] + "</div>")
+                                }
+                            });
+                        });
+                    }
+
+                    // $(".bank_block").text(response)
+                }
+            })
+        });
+    </script>
+</body>
+
+<head>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .bank_navbar {
+            background-color: #165cbc;
+            color: #fff;
+        }
+
+        .bank_head {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 500;
+        }
+
+        .nav_options {
+            float: right;
+        }
+
+        .nav_option_tab {
+            color: #fff;
+        }
+
+        .dash_container {
+            /* box-shadow: 0px 0px 5px 3px #efefef; */
+            background-color: #e8e8e8;
+            /* width: 99%; */
+            /* margin-left: 19px; */
+        }
+
+        .graph_box {
+            text-align: center;
+            box-shadow: 0px 0px 7px 4px #cbcbcb;
+        }
+
+        .graph_title {
+            color: #dbdbdb;
+            font-weight: 500;
+        }
+
+        #purch_order_count {
+            background-color: #ed143dfa;
+        }
+
+        .purch_order_val {
+            color: #fff;
+            font-size: 50px;
+        }
+
+        #on_time_del_rate {
+            background-color: cadetblue;
+        }
+
+        .on_time_del_rate_val {
+            color: #fff;
+            font-size: 50px;
+        }
+
+        #in_transit_goods_count {
+            background-color: #fc8803;
+        }
+
+        .in_transit_goods_count_val {
+            color: #fff;
+            font-size: 50px;
+        }
+
+        .bank_main_img {
+            width: -webkit-fill-available;
+            height: 200px;
+        }
+
+        .opaque_container {
+            position: absolute;
+            width: -webkit-fill-available;
+            height: 200px;
+            background-color: black;
+            opacity: 30%;
+        }
+
+        .bank_dashboard {
+            background-color: #fff;
+            box-shadow: 0px 0px 5px 5px #b4b4b4;
+        }
+
+        #purch_order,
+        #shipping_details {
+            background-color: #a5c6fd;
+            height: 92%;
+        }
+
+        .purch_ord_back li,
+        .shipping_det_back li {
+            padding: 7px;
+            background-color: #fff;
+            font-weight: 500;
+        }
+
+        .purch_ord_back li .active,
+        .shipping_det_back li .active {
+            border-style: solid;
+            border: 5px solid;
+            border-right-color: transparent;
+            border-left-color: transparent;
+            border-bottom-color: transparent;
+            /* border-top-color: #12909a; */
+            background-color: #fff;
+            color: #12909a !important;
+            /* border-radius: 6px; */
+            /* padding: 7px; */
+            font-weight: 500;
+        }
+
+        #create_po,
+        #view_po,
+        #retrieve_blocks,
+        #create_ship,
+        #view_ship,
+        #retrieve_ship_blocks {
+            border: 2px solid #efefef;
+            min-height: 100px;
+            max-height: 480px;
+            background-color: #fff;
+            padding: 1px;
+        }
+
+        #create_po_text,
+        #view_po_text,
+        #retrieve_blocks_text,
+        #create_ship_text,
+        #view_ship_text,
+        #retrieve_ship_blocks_text {
+            color: #626262 !important;
+        }
+
+        .purch_ord_back #create_po_text.active,
+        .purch_ord_back #view_po_text.active,
+        .purch_ord_back #retrieve_blocks_text.active,
+        .shipping_det_back #create_ship_text.active,
+        .shipping_det_back #view_ship_text.active,
+        .shipping_det_back #retrieve_ship_blocks_text.active {
+            color: #12909a !important;
+        }
+
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        .bank_block {
+            /* width: 1050px; */
+            /* border: 2px solid; */
+            /* margin: 20px; */
+            height: 477px;
+            display: flex;
+            overflow: scroll;
+        }
+
+        .blc_block {
+            box-shadow: 0px 0px 5px 3px #bfbfbf;
+            width: fit-content;
+            height: fit-content;
+            background-color: #fff;
+        }
+
+        .block_div {
+            border-bottom: 1px solid;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .block_topic_fnt_size {
+            font-weight: 700;
+        }
+
+        .bank_form_submit {
+            background-color: #165cbc;
+            border: none;
+            color: #fff;
+            border-radius: 15px;
+            height: 50px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            margin-left: 30px;
+            /* margin-right: 57px; */
+            margin-top: 20px;
+        }
+
+        .css_submit_button {
+            box-shadow: 0 18px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0, 0.19);
+        }
+
+        .bank_form_submit:hover {
+            background-color: #082247;
+        }
+
+        .bank_form {
+            height: 470px;
+            overflow-y: auto;
+            margin: 0;
+        }
+
+        .blc_block {
+            width: 250px;
+            flex-shrink: 0;
+        }
+
+        .validate_blockchain {
+            background-color: #fff;
+            color: black;
+            font-weight: 700;
+            border: 2px solid #4CAF50;
+            border-radius: 15px;
+            height: 50px;
+            width: 110px;
+            float: right;
+        }
+
+        .connect_nodes_blockchain {
+            background-color: #fff;
+            color: black;
+            font-weight: 700;
+            border: 2px solid #008CBA;
+            border-radius: 15px;
+            height: 50px;
+            width: 140px;
+            float: right;
+        }
+
+        .replace_chain, .view_bank_text {
+            background-color: rgb(4, 78, 53);
+            position: absolute;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 15px;
+            height: 50px;
+            width: 145px;
+            bottom: 51px;
+            right: 20px;
+        }
+
+        .validate_blockchain:hover {
+            background-color: #4CAF50;
+        }
+
+        .connect_nodes_blockchain:hover {
+            background-color: #008CBA;
+        }
+
+        .replace_chain:hover, .view_bank_text:hover {
+            background-color: #043325;
+        }
+
+        .search_bar {
+            border-radius: 20px;
+            width: 300px;
+            height: 35px;
+            margin-left: 400px;
+            margin-top: 40px;
+            padding: 18px;
+        }
+
+        .search_button {
+            border-color: #c7c7c7;
+            background-color: #d39227;
+        }
+
+        .bank_form input {
+            height: 32px;
+        }
+
+        .ship_form {
+            overflow-y: auto;
+            height: 470px;
+        }
+
+        .clearfix {
+            margin-left: 918px;
+            margin-top: -4px;
+            font-size: 6px;
+        }
+
+        .clearfix .add-record {
+            font-size: 14px;
+            padding: 4px;
+            background-color: #37488d;
+        }
+
+        .po_items_table {
+            width: 500px;
+            margin-left: 40px;
+        }
+
+        .block_display {
+            background-color: #c3c3c3;
+            margin-left: -11px;
+        }
+    </style>
+</head>
+
+</html>
